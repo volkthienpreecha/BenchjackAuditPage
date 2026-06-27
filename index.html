@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>benchjack // audit results</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#results" aria-label="BenchJack audit results home">
+      <span class="prompt">$</span>
+      <span class="name">benchjack</span>
+      <span class="scope">// audit results</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-link active" type="button" data-tab="results">results</button>
+      <button class="nav-link" type="button" data-tab="compare">compare</button>
+      <button class="nav-link" type="button" data-tab="artifacts">artifacts</button>
+      <a class="nav-link external" href="https://github.com/volkthienpreecha/benchjack" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="app-shell" id="app">
+    <section class="summary-strip" aria-label="Audit summary">
+      <div><strong id="summary-records">0</strong> public result rows</div>
+      <span class="divider"></span>
+      <div><strong id="summary-tasks">0</strong> tasks with audited scope</div>
+      <span class="divider"></span>
+      <div><strong id="summary-range">n/a</strong> exploit score range</div>
+      <span class="divider"></span>
+      <div>source: <strong id="summary-source">audit records</strong></div>
+      <div class="updated">data updated: <span id="summary-updated">loading</span></div>
+    </section>
+
+    <section class="toolbar" aria-label="Filters">
+      <label class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <input id="search" type="search" placeholder="search benchmarks..." autocomplete="off">
+      </label>
+      <label class="select-box">
+        <span>severity:</span>
+        <select id="severity-filter">
+          <option value="all">all</option>
+          <option value="critical">critical</option>
+          <option value="high">high</option>
+          <option value="medium">medium</option>
+          <option value="low">low</option>
+          <option value="na">n/a</option>
+        </select>
+      </label>
+      <label class="select-box">
+        <span>backend:</span>
+        <select id="backend-filter">
+          <option value="all">all</option>
+        </select>
+      </label>
+      <label class="select-box">
+        <span>min exploit score:</span>
+        <select id="score-filter">
+          <option value="0">0%</option>
+          <option value="50">50%</option>
+          <option value="75">75%</option>
+          <option value="90">90%</option>
+          <option value="100">100%</option>
+        </select>
+      </label>
+      <div class="toolbar-actions">
+        <button class="tool-btn" id="export-json" type="button">export json</button>
+        <button class="tool-btn" id="copy-link" type="button">copy link</button>
+      </div>
+    </section>
+
+    <section class="workspace" data-panel="results">
+      <aside class="bench-list" aria-label="Benchmarks">
+        <div class="panel-title">benchmarks (<span id="bench-count">0</span>)</div>
+        <div class="bench-list-head">
+          <span>name</span>
+          <span>tasks</span>
+          <span>score</span>
+          <span>updated</span>
+        </div>
+        <div id="benchmarks" class="benchmarks"></div>
+      </aside>
+
+      <section class="matrix-panel" aria-label="Forensic matrix">
+        <div class="panel-title">
+          <span>forensic matrix (V1-V8)</span>
+          <span>% tasks affected</span>
+        </div>
+        <div class="matrix-scroll">
+          <table class="matrix" id="matrix">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>benchmark</th>
+                <th>V1<span>Isolation</span></th>
+                <th>V2<span>Answers</span></th>
+                <th>V3<span>RCE</span></th>
+                <th>V4<span>LLM Judge</span></th>
+                <th>V5<span>Matching</span></th>
+                <th>V6<span>Logic</span></th>
+                <th>V7<span>Trust</span></th>
+                <th>V8<span>Perms</span></th>
+              </tr>
+            </thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+        </div>
+        <div class="legend" aria-label="Severity legend">
+          <span>severity legend:</span>
+          <span><i class="dot low"></i>low</span>
+          <span><i class="dot medium"></i>medium</span>
+          <span><i class="dot high"></i>high</span>
+          <span><i class="dot critical"></i>critical</span>
+          <span class="none">- none / not tested</span>
+        </div>
+      </section>
+
+      <aside class="detail-panel" id="detail" aria-label="Selected audit details">
+        <div class="detail-empty">loading audit records...</div>
+      </aside>
+    </section>
+
+    <section class="workspace hidden" data-panel="compare">
+      <div class="compare-panel">
+        <div class="panel-title">compare</div>
+        <div id="compare-content" class="compare-content"></div>
+      </div>
+    </section>
+
+    <section class="workspace hidden" data-panel="artifacts">
+      <div class="artifacts-panel">
+        <div class="panel-title">artifacts</div>
+        <div id="artifacts-content" class="artifacts-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <div id="severity-counts"></div>
+    <div class="meta">
+      <span>benchjack audit page</span>
+      <span>data: <span id="footer-data-date">loading</span></span>
+      <span>license: Apache-2.0</span>
+    </div>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
+
