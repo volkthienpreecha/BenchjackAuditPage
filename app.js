@@ -396,10 +396,11 @@ function scopeLabel(value) {
   if (!value || value === "-") return "-";
   const text = value.toLowerCase();
   if (text.startsWith("all ")) return "all";
-  if (text.includes("majority")) return "majority";
+  if (text.includes("majority")) return "maj";
   if (text.includes("most")) return "most";
   if (text.includes("many")) return "many";
   if (text.includes("multiple")) return "multi";
+  if (text.includes("root")) return "root";
   return value;
 }
 

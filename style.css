@@ -229,6 +229,7 @@ a {
 .detail-panel,
 .compare-panel,
 .artifacts-panel {
+  min-width: 0;
   min-height: 0;
   border: 1px solid var(--border);
   background: color-mix(in oklch, var(--bg), var(--surface) 40%);
@@ -243,6 +244,10 @@ a {
   border-bottom: 1px solid var(--border);
   color: var(--dim);
   font-size: 12px;
+}
+
+.bench-list > .panel-title {
+  justify-content: flex-start;
 }
 
 .bench-list {
@@ -304,6 +309,7 @@ a {
   margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
+  overflow-wrap: anywhere;
 }
 
 .bench-score {
@@ -332,6 +338,7 @@ a {
 
 .matrix {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
   table-layout: fixed;
 }
