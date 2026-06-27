@@ -1,0 +1,142 @@
+{
+  "generated_at": "2026-06-27",
+  "records": [
+    {
+      "artifacts": [
+        {
+          "kind": "code",
+          "label": "poc/exploit_agent.py",
+          "path": "poc/exploit_agent.py",
+          "size_bytes": 10598,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/poc/exploit_agent.py"
+        },
+        {
+          "kind": "code",
+          "label": "poc/run.sh",
+          "path": "poc/run.sh",
+          "size_bytes": 7902,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/poc/run.sh"
+        },
+        {
+          "kind": "markdown",
+          "label": "PoC notes",
+          "path": "poc.md",
+          "size_bytes": 5010,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/poc.md"
+        },
+        {
+          "kind": "markdown",
+          "label": "audit summary",
+          "path": "README.md",
+          "size_bytes": 2720,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/README.md"
+        },
+        {
+          "kind": "markdown",
+          "label": "recon report",
+          "path": "recon.md",
+          "size_bytes": 4372,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/recon.md"
+        },
+        {
+          "kind": "markdown",
+          "label": "vulnerability scan",
+          "path": "vuln_scan.md",
+          "size_bytes": 11048,
+          "url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/vuln_scan.md"
+        }
+      ],
+      "audited_on": "2026-04-16",
+      "auditor": "BenchJack maintainers",
+      "backend": "claude",
+      "disclosure": [
+        "[x] Not applicable - findings describe architectural patterns documented in the public repo; no new live-service exploit."
+      ],
+      "exploit_score": null,
+      "exploit_score_label": "not aggregated",
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "all 17 tasks",
+          "severity": "high"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "many tasks",
+          "severity": "high"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "RCE on Untrusted Input",
+          "prevalence": "majority of tasks",
+          "severity": "high"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching (anti-cheat)",
+          "prevalence": "most tasks",
+          "severity": "medium"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "multiple tasks",
+          "severity": "medium"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "majority of tasks",
+          "severity": "high"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Unnecessary Permissions",
+          "prevalence": "root agent, GPU exposure, 2x internet-on tasks",
+          "severity": "medium"
+        }
+      },
+      "id": "frontierswe",
+      "missing_artifact_references": [
+        "task_ids.json",
+        "task_results.json"
+      ],
+      "mode": "audit",
+      "name": "FrontierSWE",
+      "reproduction": "benchjack https://github.com/Proximal-Labs/frontier-swe --no-ui",
+      "source_path": "audits/FrontierSWE/README.md",
+      "source_url": "https://github.com/volkthienpreecha/benchjack/blob/main/audits/FrontierSWE/README.md",
+      "summary": "FrontierSWE is 17 ultra-long-horizon (20-hour) coding tasks orchestrated by Harbor on Modal sandboxes. Every task runs the agent phase and the verifier phase inside the same container - so V1 (no isolation) and V3 (verifier builds/runs agent-authored code) are architectural and propagate to V7 (scorer trusts agent-produced output) across the majority of tasks. Anti-cheat is grep-based, making V5 systemic. V4 (LLM judge) is absent - all scoring is deterministic. The most exploitable tasks are libexpat-to-x86asm (plain-text AES keys on shared FS), modular-stack-wan21 (.oracle_solution touch bypass), frogsgame-rl (internet + TINKER_API_KEY), optimizer-design (agent-supplied CustomOptimizer can forge loss), and revideo-perf-opt (cp baseline mp4 -> SSIM~=1).",
+      "task_count": 17,
+      "upstream_commit": "d2ba265 (2026-04-16)",
+      "upstream_commit_url": "https://github.com/Proximal-Labs/frontier-swe/commit/d2ba265a79b1b5a7ba34763802cb43720a183f67",
+      "upstream_repo": "https://github.com/Proximal-Labs/frontier-swe"
+    }
+  ],
+  "source": {
+    "branch": "main",
+    "commit": "c828d416df2093ae100e24755cf9dcc5831411b0",
+    "path": "C:\\Users\\volko\\Downloads\\benchjack\\audits",
+    "repo_url": "https://github.com/volkthienpreecha/benchjack"
+  },
+  "summary": {
+    "exploit_score_range": null,
+    "record_count": 1,
+    "severity_counts": {
+      "critical": 0,
+      "high": 4,
+      "low": 0,
+      "medium": 3,
+      "na": 1
+    },
+    "task_count": 17
+  }
+}

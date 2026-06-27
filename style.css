@@ -103,7 +103,7 @@ a {
 }
 
 .nav-link.external::after {
-  content: "↗";
+  content: "^";
   margin-left: 5px;
   color: var(--dim);
 }
@@ -529,4 +529,3 @@ a {
     padding: 10px 16px;
   }
 }
-
