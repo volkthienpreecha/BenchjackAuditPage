@@ -414,6 +414,10 @@ a {
   background: var(--green);
 }
 
+.dot.major {
+  background: var(--purple);
+}
+
 .legend {
   margin: 16px;
   min-height: 52px;
@@ -496,6 +500,25 @@ a {
 }
 
 .detail-section .dim {
+  color: var(--dim);
+}
+
+.empty-inline {
+  padding: 8px 0 14px;
+  color: var(--dim);
+  font-size: 12px;
+}
+
+.note-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.note-list p {
+  margin: 0;
   color: var(--dim);
 }
 
@@ -611,6 +634,11 @@ a {
 .severity-token.low,
 .count.low {
   color: var(--green);
+}
+
+.severity-token.major,
+.count.major {
+  color: var(--purple);
 }
 
 .statusbar {

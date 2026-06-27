@@ -17,7 +17,7 @@
       <button class="nav-link active" type="button" data-tab="results">results</button>
       <button class="nav-link" type="button" data-tab="compare">compare</button>
       <button class="nav-link" type="button" data-tab="artifacts">artifacts</button>
-      <a class="nav-link external" href="https://github.com/volkthienpreecha/benchjack" target="_blank" rel="noreferrer">GitHub</a>
+      <a class="nav-link external" href="https://github.com/benchjack/benchjack" target="_blank" rel="noreferrer">GitHub</a>
     </nav>
   </header>
 
@@ -29,6 +29,8 @@
       <span class="divider"></span>
       <div><strong id="summary-range">n/a</strong> exploit score range</div>
       <span class="divider"></span>
+      <div><strong id="summary-flaws">n/a</strong> paper flaws</div>
+      <span class="divider"></span>
       <div>source: <strong id="summary-source">audit records</strong></div>
       <div class="updated">data updated: <span id="summary-updated">loading</span></div>
     </section>
@@ -39,9 +41,10 @@
         <input id="search" type="search" placeholder="search benchmarks..." autocomplete="off">
       </label>
       <label class="select-box">
-        <span>severity:</span>
+        <span>flaw:</span>
         <select id="severity-filter">
           <option value="all">all</option>
+          <option value="major">major</option>
           <option value="critical">critical</option>
           <option value="high">high</option>
           <option value="medium">medium</option>
@@ -108,7 +111,8 @@
           </table>
         </div>
         <div class="legend" aria-label="Severity legend">
-          <span>severity legend:</span>
+          <span>matrix legend:</span>
+          <span><i class="dot major"></i>major flaw</span>
           <span><i class="dot low"></i>low</span>
           <span><i class="dot medium"></i>medium</span>
           <span><i class="dot high"></i>high</span>

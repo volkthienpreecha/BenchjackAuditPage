@@ -21,7 +21,7 @@ const VULN_LABELS = {
   V8: "Perms",
 };
 
-const SEVERITY_ORDER = ["critical", "high", "medium", "low", "na"];
+const STATUS_ORDER = ["major", "critical", "high", "medium", "low", "na"];
 
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-tab]").forEach((button) => {
@@ -69,15 +69,69 @@ function bindFilters() {
 
 async function loadData() {
   try {
-    const response = await fetch("data/audits.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    state.data = await response.json();
+    const [paper, audit] = await Promise.all([
+      fetchJson("data/paper-study.json"),
+      fetchJson("data/audits.json"),
+    ]);
+    state.data = buildDisplayData(paper, audit);
     state.selectedId = initialSelection(state.data.records);
     hydrateBackendFilter(state.data.records);
     render();
   } catch (error) {
-    document.querySelector("#detail").innerHTML = `<div class="detail-empty">failed to load audit data: ${escapeHtml(error.message)}</div>`;
+    document.querySelector("#detail").innerHTML = `<div class="detail-empty">failed to load result data: ${escapeHtml(error.message)}</div>`;
   }
+}
+
+async function fetchJson(path) {
+  const response = await fetch(path, { cache: "no-store" });
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  return response.json();
+}
+
+function buildDisplayData(paper, audit) {
+  const archiveRecords = audit?.records || [];
+  const archiveByName = new Map(archiveRecords.map((record) => [normalizeName(record.name), record]));
+  const paperRecords = paper?.records?.map((record) => enrichPaperRecord(record, archiveByName.get(normalizeName(record.name)))) || [];
+  const records = paperRecords.length
+    ? paperRecords
+    : archiveRecords.map((record) => ({ ...record, record_source: "audit-archive", source_label: "Audit archive" }));
+
+  if (!records.length) throw new Error("no paper study or audit archive records found");
+
+  return {
+    generated_at: paper?.generated_at || audit?.generated_at || "unknown",
+    source_label: paperRecords.length ? "paper study" : "audit records",
+    source_url: paper?.source?.url || audit?.source?.repo_url || "",
+    paper,
+    audit,
+    archive_records: archiveRecords,
+    notes: paper?.notes || [],
+    summary: {
+      flaw_count: paper?.summary?.flaw_count ?? null,
+      table_task_count: paper?.summary?.table_task_count ?? null,
+      record_count: records.length,
+    },
+    records,
+  };
+}
+
+function enrichPaperRecord(record, archive) {
+  return {
+    ...record,
+    artifacts: archive?.artifacts || [],
+    archive_source_path: archive?.source_path || "",
+    archive_source_url: archive?.source_url || "",
+    disclosure: archive?.disclosure || [],
+    record_source: "paper-study",
+    reproduction: archive?.reproduction || "",
+    upstream_commit: archive?.upstream_commit || "",
+    upstream_commit_url: archive?.upstream_commit_url || "",
+    upstream_repo: archive?.upstream_repo || record.upstream_repo || "",
+  };
+}
+
+function normalizeName(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
 function initialSelection(records) {
@@ -104,9 +158,15 @@ function filteredRecords() {
     const haystack = [
       record.name,
       record.summary,
+      record.exploit_summary,
+      record.domain,
+      record.evaluation_method,
       record.upstream_repo,
       record.auditor,
       record.backend,
+      record.mode,
+      record.source_label,
+      ...(record.major_flaws || []),
     ].join(" ").toLowerCase();
     if (state.filters.search && !haystack.includes(state.filters.search)) return false;
     if (state.filters.backend !== "all" && record.backend !== state.filters.backend) return false;
@@ -115,7 +175,7 @@ function filteredRecords() {
       if (!matchesSeverity) return false;
     }
     if (state.filters.score > 0) {
-      if (record.exploit_score === null || Number(record.exploit_score) < state.filters.score) return false;
+      if (record.exploit_score === null || record.exploit_score === undefined || Number(record.exploit_score) < state.filters.score) return false;
     }
     return true;
   });
@@ -141,9 +201,10 @@ function renderSummary(records) {
   const scores = records.map((record) => record.exploit_score).filter((score) => score !== null && score !== undefined);
   document.querySelector("#summary-records").textContent = records.length.toLocaleString();
   document.querySelector("#summary-tasks").textContent = taskCount.toLocaleString();
-  document.querySelector("#summary-range").textContent = scores.length ? `${Math.min(...scores)}-${Math.max(...scores)}%` : "n/a";
-  document.querySelector("#summary-source").textContent = "audit records";
+  document.querySelector("#summary-range").textContent = scores.length ? `${formatPercent(Math.min(...scores))}-${formatPercent(Math.max(...scores))}` : "n/a";
+  document.querySelector("#summary-source").textContent = state.data.source_label;
   document.querySelector("#summary-updated").textContent = state.data.generated_at;
+  document.querySelector("#summary-flaws").textContent = state.data.summary.flaw_count?.toLocaleString() || "n/a";
   document.querySelector("#footer-data-date").textContent = state.data.generated_at;
   document.querySelector("#bench-count").textContent = records.length;
 }
@@ -152,7 +213,7 @@ function renderBenchmarks(records) {
   const root = document.querySelector("#benchmarks");
   root.innerHTML = "";
   if (records.length === 0) {
-    root.innerHTML = `<div class="empty-state">no audit records match the current filters</div>`;
+    root.innerHTML = `<div class="empty-state">no result records match the current filters</div>`;
     return;
   }
   records.forEach((record, index) => {
@@ -162,7 +223,7 @@ function renderBenchmarks(records) {
     button.innerHTML = `
       <span>
         <span class="bench-name">${index + 1} ${escapeHtml(record.name)}</span>
-        <span class="bench-desc">${escapeHtml(hostLabel(record.upstream_repo) || "audit record")}</span>
+        <span class="bench-desc">${escapeHtml(record.domain || hostLabel(record.upstream_repo) || record.source_label || "result record")}</span>
       </span>
       <span>${record.task_count ?? "n/a"}</span>
       <span class="bench-score">${scoreLabel(record)}</span>
@@ -208,35 +269,44 @@ function findingCell(finding) {
 function renderDetail(record) {
   const root = document.querySelector("#detail");
   if (!record) {
-    root.innerHTML = `<div class="detail-empty">select an audit record</div>`;
+    root.innerHTML = `<div class="detail-empty">select a result record</div>`;
     return;
   }
+
+  const notes = [...(record.data_notes || []), ...sourceSpecificNotes(record)];
   root.innerHTML = `
     <div class="detail-head">
       <h2>${escapeHtml(record.name)}</h2>
       <button id="close-detail" type="button" aria-label="Clear selection">x</button>
     </div>
     <div class="detail-section meta-grid">
-      ${metaRow("upstream repo", linkHtml(record.upstream_repo, hostLabel(record.upstream_repo)), true)}
-      ${metaRow("upstream commit", linkHtml(record.upstream_commit_url, record.upstream_commit || "n/a"), true)}
-      ${metaRow("audited date", record.audited_on || "n/a")}
+      ${metaRow("source", linkHtml(record.source_url, record.source_label || "paper source"), true)}
+      ${record.domain ? metaRow("domain", record.domain) : ""}
+      ${record.evaluation_method ? metaRow("evaluation", record.evaluation_method) : ""}
+      ${metaRow(record.record_source === "paper-study" ? "table tasks" : "tasks", record.task_count ?? "n/a")}
+      ${metaRow("exploit outcome", outcomeLabel(record))}
+      ${metaRow("major flaws", majorFlawLabel(record))}
+      ${record.upstream_repo ? metaRow("upstream repo", linkHtml(record.upstream_repo, hostLabel(record.upstream_repo)), true) : ""}
+      ${record.upstream_commit ? metaRow("upstream commit", linkHtml(record.upstream_commit_url, record.upstream_commit), true) : ""}
+      ${metaRow("date", record.audited_on || "n/a")}
       ${metaRow("backend", record.backend || "n/a")}
       ${metaRow("mode", record.mode || "n/a")}
-      ${metaRow("auditor", record.auditor || "n/a")}
-      ${metaRow("exploit score", scoreLabel(record))}
+      ${record.archive_source_url ? metaRow("audit archive", linkHtml(record.archive_source_url, record.archive_source_path || "FrontierSWE archive"), true) : ""}
     </div>
     <div class="detail-section">
       <h3>artifacts</h3>
       <div class="artifact-list">
-        ${record.artifacts.map((artifact) => artifactRow(artifact)).join("")}
+        ${record.artifacts?.length ? record.artifacts.map((artifact) => artifactRow(artifact)).join("") : `<div class="empty-inline">no artifact-backed public archive for this row</div>`}
       </div>
-      <a class="subtle-link" href="${escapeHtml(record.source_url)}" target="_blank" rel="noreferrer">view source README</a>
+      ${record.archive_source_url ? `<a class="subtle-link" href="${escapeHtml(record.archive_source_url)}" target="_blank" rel="noreferrer">view audit README</a>` : ""}
     </div>
     <div class="detail-section">
       <h3>exploit note</h3>
-      <p>${escapeHtml(record.summary)}</p>
+      <p>${escapeHtml(record.exploit_summary || record.summary)}</p>
+      ${record.summary && record.exploit_summary ? `<p class="dim">${escapeHtml(record.summary)}</p>` : ""}
       ${record.reproduction ? `<pre><code>${escapeHtml(record.reproduction)}</code></pre>` : ""}
-      ${record.disclosure.length ? `<p class="dim">${escapeHtml(record.disclosure.join(" "))}</p>` : ""}
+      ${record.disclosure?.length ? `<p class="dim">${escapeHtml(record.disclosure.join(" "))}</p>` : ""}
+      ${notes.length ? `<div class="note-list">${notes.map((note) => `<p>${escapeHtml(note)}</p>`).join("")}</div>` : ""}
     </div>
   `;
   document.querySelector("#close-detail").addEventListener("click", () => {
@@ -244,6 +314,13 @@ function renderDetail(record) {
     history.replaceState(null, "", location.pathname);
     render();
   });
+}
+
+function sourceSpecificNotes(record) {
+  if (record.record_source !== "paper-study") return [];
+  return [
+    "Matrix dots for paper-study rows represent Table 1 major flaw classes, not a full per-finding severity ledger.",
+  ];
 }
 
 function renderCompare(records) {
@@ -257,8 +334,10 @@ function renderCompare(records) {
       <thead>
         <tr>
           <th>benchmark</th>
+          <th>domain</th>
           <th>tasks</th>
-          <th>backend</th>
+          <th>exploit</th>
+          <th>major flaws</th>
           ${Object.keys(VULN_LABELS).map((vuln) => `<th>${vuln}</th>`).join("")}
         </tr>
       </thead>
@@ -266,10 +345,12 @@ function renderCompare(records) {
         ${records.map((record) => `
           <tr>
             <td>${escapeHtml(record.name)}</td>
+            <td>${escapeHtml(record.domain || "n/a")}</td>
             <td>${record.task_count ?? "n/a"}</td>
-            <td>${escapeHtml(record.backend || "n/a")}</td>
+            <td>${escapeHtml(outcomeLabel(record))}</td>
+            <td>${escapeHtml(majorFlawLabel(record))}</td>
             ${Object.keys(VULN_LABELS).map((vuln) => {
-              const finding = record.findings[vuln];
+              const finding = record.findings[vuln] || { severity: "na" };
               return `<td><span class="severity-token ${finding.severity}">${escapeHtml(finding.severity)}</span></td>`;
             }).join("")}
           </tr>
@@ -281,7 +362,7 @@ function renderCompare(records) {
 
 function renderArtifacts(records) {
   const root = document.querySelector("#artifacts-content");
-  const artifacts = records.flatMap((record) => record.artifacts.map((artifact) => ({ ...artifact, benchmark: record.name })));
+  const artifacts = records.flatMap((record) => (record.artifacts || []).map((artifact) => ({ ...artifact, benchmark: record.name })));
   if (artifacts.length === 0) {
     root.innerHTML = `<div class="empty-state">no public artifacts match the current filters</div>`;
     return;
@@ -298,15 +379,18 @@ function renderArtifacts(records) {
 }
 
 function renderFooter(records) {
-  const counts = { critical: 0, high: 0, medium: 0, low: 0, na: 0 };
+  const counts = Object.fromEntries(STATUS_ORDER.map((status) => [status, 0]));
   for (const record of records) {
-    for (const finding of Object.values(record.findings)) counts[finding.severity] += 1;
+    for (const finding of Object.values(record.findings)) {
+      counts[finding.severity] = (counts[finding.severity] || 0) + 1;
+    }
   }
   document.querySelector("#severity-counts").innerHTML = `
-    <span class="count critical">${counts.critical} Critical</span>
-    <span class="count high">${counts.high} High</span>
-    <span class="count medium">${counts.medium} Medium</span>
-    <span class="count low">${counts.low} Low</span>
+    <span class="count major">${counts.major || 0} Major</span>
+    <span class="count critical">${counts.critical || 0} Critical</span>
+    <span class="count high">${counts.high || 0} High</span>
+    <span class="count medium">${counts.medium || 0} Medium</span>
+    <span class="count low">${counts.low || 0} Low</span>
     <span>|</span>
     <span>${records.length} Total Records</span>
   `;
@@ -324,7 +408,7 @@ function exportJson() {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "benchjack-audits.json";
+  anchor.download = "benchjack-results.json";
   anchor.click();
   URL.revokeObjectURL(url);
 }
@@ -377,9 +461,21 @@ function linkHtml(url, label) {
 }
 
 function scoreLabel(record) {
+  if (record.exploit_score_label) return record.exploit_score_label;
   return record.exploit_score === null || record.exploit_score === undefined
     ? "n/a"
-    : `${record.exploit_score}%`;
+    : formatPercent(record.exploit_score);
+}
+
+function outcomeLabel(record) {
+  if (record.exploited_count !== undefined && record.outcome_denominator !== undefined) {
+    return `${record.exploited_count.toLocaleString()} / ${record.outcome_denominator.toLocaleString()} exploited (${scoreLabel(record)})`;
+  }
+  return scoreLabel(record);
+}
+
+function majorFlawLabel(record) {
+  return record.major_flaws?.length ? record.major_flaws.join(", ") : "n/a";
 }
 
 function hostLabel(url) {
@@ -395,6 +491,7 @@ function hostLabel(url) {
 function scopeLabel(value) {
   if (!value || value === "-") return "-";
   const text = value.toLowerCase();
+  if (text.includes("table 1 major")) return "major";
   if (text.startsWith("all ")) return "all";
   if (text.includes("majority")) return "maj";
   if (text.includes("most")) return "most";
@@ -402,6 +499,10 @@ function scopeLabel(value) {
   if (text.includes("multiple")) return "multi";
   if (text.includes("root")) return "root";
   return value;
+}
+
+function formatPercent(value) {
+  return `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
 }
 
 function formatBytes(bytes) {
