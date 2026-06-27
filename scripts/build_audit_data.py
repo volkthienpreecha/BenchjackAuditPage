@@ -40,6 +40,16 @@ def _run_git(root: Path, args: list[str]) -> str | None:
     return value or None
 
 
+def _git_blob_size(root: Path, repo_path: str) -> int | None:
+    value = _run_git(root, ["cat-file", "-s", f"HEAD:{repo_path}"])
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
 def _normalize_repo_url(value: str | None) -> str:
     if not value:
         return DEFAULT_REPO_URL
@@ -51,10 +61,10 @@ def _normalize_repo_url(value: str | None) -> str:
     return value
 
 
-def source_info(source_root: Path) -> SourceInfo:
+def source_info(source_root: Path, repo_url: str | None = None) -> SourceInfo:
     return SourceInfo(
         root=source_root,
-        repo_url=_normalize_repo_url(_run_git(source_root, ["config", "--get", "remote.origin.url"])),
+        repo_url=_normalize_repo_url(repo_url or _run_git(source_root, ["config", "--get", "remote.origin.url"])),
         commit=_run_git(source_root, ["rev-parse", "HEAD"]),
         branch=_run_git(source_root, ["branch", "--show-current"]) or "main",
     )
@@ -221,7 +231,7 @@ def collect_artifacts(audit_dir: Path, source: SourceInfo) -> tuple[list[dict], 
             "path": rel,
             "label": artifact_label(Path(rel)),
             "kind": artifact_kind(path),
-            "size_bytes": path.stat().st_size,
+            "size_bytes": _git_blob_size(source.root, repo_rel) or path.stat().st_size,
             "url": f"{source.repo_url}/blob/{source.branch}/{repo_rel}",
         })
 
@@ -273,8 +283,8 @@ def severity_counts(records: Iterable[dict]) -> dict[str, int]:
     return counts
 
 
-def build_snapshot(source_root: Path) -> dict:
-    source = source_info(source_root)
+def build_snapshot(source_root: Path, repo_url: str | None = None) -> dict:
+    source = source_info(source_root, repo_url)
     audits_root = source.root / "audits"
     records = []
     if audits_root.exists():
@@ -290,7 +300,7 @@ def build_snapshot(source_root: Path) -> dict:
             "repo_url": source.repo_url,
             "commit": source.commit,
             "branch": source.branch,
-            "path": str(audits_root),
+            "path": "audits",
         },
         "summary": {
             "record_count": len(records),
@@ -306,9 +316,10 @@ def main_with_args(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True, help="Path to the BenchJack repo")
     parser.add_argument("--out", type=Path, default=Path("data/audits.json"), help="Output JSON path")
+    parser.add_argument("--repo-url", help="Public GitHub repository URL to use for artifact links")
     args = parser.parse_args(argv)
 
-    snapshot = build_snapshot(args.source.resolve())
+    snapshot = build_snapshot(args.source.resolve(), repo_url=args.repo_url)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
