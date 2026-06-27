@@ -302,16 +302,20 @@ def build_snapshot(source_root: Path) -> dict:
     }
 
 
-def main() -> int:
+def main_with_args(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True, help="Path to the BenchJack repo")
     parser.add_argument("--out", type=Path, default=Path("data/audits.json"), help="Output JSON path")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     snapshot = build_snapshot(args.source.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
+
+
+def main() -> int:
+    return main_with_args()
 
 
 if __name__ == "__main__":
