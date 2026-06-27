@@ -1,0 +1,755 @@
+{
+  "generated_at": "2026-06-27",
+  "source": {
+    "arxiv_id": "2605.12673",
+    "kind": "paper-study",
+    "paper_date": "2026-05-12",
+    "paper_version": "v1",
+    "pdf_url": "https://arxiv.org/pdf/2605.12673",
+    "repo_commit": "22c554f217357da5b3107c6e3fd7a128cef42d3b",
+    "repo_commit_date": "2026-05-25",
+    "repo_url": "https://github.com/benchjack/benchjack",
+    "title": "Do Androids Dream of Breaking the Game? Systematically Auditing AI Agent Benchmarks with BenchJack",
+    "url": "https://arxiv.org/abs/2605.12673"
+  },
+  "summary": {
+    "backend": "Claude Code",
+    "chart_value_policy": "exact values only; chart-only values are not digitized",
+    "flaw_count": 219,
+    "record_count": 10,
+    "table_task_count": 8614
+  },
+  "notes": [
+    "Paper Table 1 lists Terminal-Bench with 89 tasks, while Appendix E/F reports Terminal-Bench exploit and patch outcomes over 241 tasks. The table task count and appendix exploit denominator are therefore shown separately.",
+    "Paper text reports 219 distinct flaws, while Figure 6 labels per-flaw task coverage as 230 total. This dataset uses 219 as the headline and does not convert Figure 6 chart-only bins into data."
+  ],
+  "records": [
+    {
+      "appendix_section": "E.10",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Web navigation",
+      "evaluation_method": "DOM + LLM judge",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit loads local task config JSON through file:// and emits the referenced gold answers or mock judge verdicts.",
+      "exploited_count": 812,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "webarena-paper",
+      "major_flaws": [
+        "V2",
+        "V5"
+      ],
+      "mode": "paper-study",
+      "name": "WebArena",
+      "outcome_denominator": 812,
+      "source_label": "Paper Table 1 + Appendix E.10",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "WebArena is a web-navigation benchmark whose paper-study exploit wins all 812 tasks by leaking answer-bearing task configs and controlling judge-facing outputs.",
+      "task_count": 812
+    },
+    {
+      "appendix_section": "E.5",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Desktop computing",
+      "evaluation_method": "Script-based grading",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit chains host-side eval on VM-controlled output with VM-state fabrication paths.",
+      "exploited_count": 369,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "osworld-paper",
+      "major_flaws": [
+        "V7"
+      ],
+      "mode": "paper-study",
+      "name": "OSWorld",
+      "outcome_denominator": 369,
+      "source_label": "Paper Table 1 + Appendix E.5",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "OSWorld is a desktop-computing benchmark where the study exploit hacks all 369 tasks through grader-host execution and agent-mutable VM state.",
+      "task_count": 369
+    },
+    {
+      "appendix_section": "E.7",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Software engineering",
+      "evaluation_method": "Test suite + parser",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit injects parser and test-runner bypasses that satisfy the official SWE-bench Pro pipeline.",
+      "exploited_count": 731,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "swe-bench-pro-paper",
+      "major_flaws": [
+        "V1",
+        "V7"
+      ],
+      "mode": "paper-study",
+      "name": "SWE-bench Pro",
+      "outcome_denominator": 731,
+      "source_label": "Paper Table 1 + Appendix E.7",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "SWE-bench Pro is a software-engineering benchmark where the paper-study exploit verifies all 731 entries end-to-end through the official pipeline.",
+      "task_count": 731
+    },
+    {
+      "appendix_section": "E.8",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Software engineering",
+      "evaluation_method": "Test suite",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit uses a pytest hook to rewrite test reports and make every targeted test appear to pass.",
+      "exploited_count": 500,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "swe-bench-verified-paper",
+      "major_flaws": [
+        "V7"
+      ],
+      "mode": "paper-study",
+      "name": "SWE-bench Verified",
+      "outcome_denominator": 500,
+      "source_label": "Paper Table 1 + Appendix E.8",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "SWE-bench Verified is a software-engineering benchmark where the paper-study exploit verifies all 500 instances without solving the underlying tasks.",
+      "task_count": 500
+    },
+    {
+      "appendix_section": "E.9",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "data_notes": [
+        "Table 1 lists Terminal-Bench with 89 tasks, while Appendix E reports the complete exploit over 241 tasks."
+      ],
+      "domain": "Terminal operations",
+      "evaluation_method": "Pytest framework",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit trojans dependency and shell paths to fake passing pytest output during verification.",
+      "exploited_count": 241,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "terminal-bench-paper",
+      "major_flaws": [
+        "V1"
+      ],
+      "mode": "paper-study",
+      "name": "Terminal-Bench",
+      "outcome_denominator": 241,
+      "source_label": "Paper Table 1 + Appendix E.9",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "Terminal-Bench is a terminal-operations benchmark where Appendix E reports a single payload verifying 241 of 241 tasks. Table 1 lists the benchmark scope as 89 tasks, so both numbers are kept separate.",
+      "task_count": 89
+    },
+    {
+      "appendix_section": "E.2",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Software engineering",
+      "evaluation_method": "Test suite + verifier",
+      "exploit_score": 100,
+      "exploit_score_label": "100%",
+      "exploit_summary": "The exploit pre-writes winning reward files and hijacks python3 inside the shared agent/verifier container.",
+      "exploited_count": 17,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "frontierswe-paper",
+      "major_flaws": [
+        "V1",
+        "V7"
+      ],
+      "mode": "paper-study",
+      "name": "FrontierSWE",
+      "outcome_denominator": 17,
+      "source_label": "Paper Table 1 + Appendix E.2",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "FrontierSWE is a 17-task long-horizon coding benchmark where the paper-study exploit scores 100.0 on all tasks by exploiting the shared verifier trust boundary.",
+      "task_count": 17
+    },
+    {
+      "appendix_section": "E.4",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Network navigation",
+      "evaluation_method": "Script-based grading",
+      "exploit_score": 99.4,
+      "exploit_score_label": "99.4%",
+      "exploit_summary": "The MALT evaluator execs agent-produced Python, allowing the exploit to rebind evaluator correctness checks.",
+      "exploited_count": 5000,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "netarena-paper",
+      "major_flaws": [
+        "V3"
+      ],
+      "mode": "paper-study",
+      "name": "NetArena",
+      "outcome_denominator": 5030,
+      "source_label": "Paper Table 1 + Appendix E.4",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "NetArena is a network-navigation benchmark where the study exploit gets all 5000 MALT queries in a 5030-task suite to emit passing correctness results.",
+      "task_count": 5030
+    },
+    {
+      "appendix_section": "E.3",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "ML engineering",
+      "evaluation_method": "Script-based grading",
+      "exploit_score": 98.7,
+      "exploit_score_label": "98.7%",
+      "exploit_summary": "The exploit reconstructs private labels from public Kaggle data and deterministic split behavior.",
+      "exploited_count": 74,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "mle-bench-paper",
+      "major_flaws": [
+        "V2",
+        "V6"
+      ],
+      "mode": "paper-study",
+      "name": "MLE-Bench",
+      "outcome_denominator": 75,
+      "source_label": "Paper Table 1 + Appendix E.3",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "MLE-Bench is an ML-engineering benchmark where the study exploit scores AUROC = 1.0 on 74 of 75 competitions.",
+      "task_count": 75
+    },
+    {
+      "appendix_section": "E.6",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "Coding skills",
+      "evaluation_method": "Pytest framework",
+      "exploit_score": 89.8,
+      "exploit_score_label": "89.8%",
+      "exploit_summary": "The exploit pre-writes reward files, shims test runners, blocks reinstall paths, and guards reward output from overwrite.",
+      "exploited_count": 79,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "skillsbench-paper",
+      "major_flaws": [
+        "V1"
+      ],
+      "mode": "paper-study",
+      "name": "SkillsBench",
+      "outcome_denominator": 88,
+      "source_label": "Paper Table 1 + Appendix E.6",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "SkillsBench is a coding-skills benchmark where the paper-study exploit reaches reward = 1.0 on 79 of 88 tasks.",
+      "task_count": 88
+    },
+    {
+      "appendix_section": "E.1",
+      "audited_on": "2026-05-12",
+      "backend": "claude-code",
+      "domain": "General agent harness",
+      "evaluation_method": "Multi-task",
+      "exploit_score": 33.2,
+      "exploit_score_label": "33.2%",
+      "exploit_summary": "The exploit sends an eval-bearing final answer to patch the dbbench result processor during scoring.",
+      "exploited_count": 300,
+      "findings": {
+        "V1": {
+          "id": "V1",
+          "name": "No Isolation Between Agent and Evaluator",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V2": {
+          "id": "V2",
+          "name": "Answers Shipped With the Test",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V3": {
+          "id": "V3",
+          "name": "Remote Code Execution on Untrusted Input",
+          "prevalence": "Table 1 major flaw",
+          "severity": "major"
+        },
+        "V4": {
+          "id": "V4",
+          "name": "LLM Judge Without Sanitization",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V5": {
+          "id": "V5",
+          "name": "Weak String Matching",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V6": {
+          "id": "V6",
+          "name": "Evaluation Logic Gaps",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V7": {
+          "id": "V7",
+          "name": "Trusting Output of Untrusted Code",
+          "prevalence": "-",
+          "severity": "na"
+        },
+        "V8": {
+          "id": "V8",
+          "name": "Granting Unnecessary Permissions",
+          "prevalence": "-",
+          "severity": "na"
+        }
+      },
+      "id": "agentbench-paper",
+      "major_flaws": [
+        "V3"
+      ],
+      "mode": "paper-study",
+      "name": "AgentBench",
+      "outcome_denominator": 903,
+      "source_label": "Paper Table 1 + Appendix E.1",
+      "source_url": "https://arxiv.org/abs/2605.12673",
+      "summary": "AgentBench is a general multi-task agent harness where the paper-study exploit scores all 300 dbbench-std samples out of a 903-task suite.",
+      "task_count": 903
+    }
+  ]
+}
