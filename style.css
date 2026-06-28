@@ -12,11 +12,48 @@
   --orange: oklch(0.77 0.17 51);
   --red: oklch(0.68 0.22 27);
   --purple: oklch(0.78 0.16 310);
+  --scrollbar-thumb: oklch(0.34 0.006 145);
+  --scrollbar-thumb-hover: oklch(0.48 0.006 145);
   --font: "Berkeley Mono", "JetBrains Mono", "IBM Plex Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 
 * {
   box-sizing: border-box;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 42px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--scrollbar-thumb);
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 html,
@@ -267,6 +304,7 @@ a {
 
 .benchmarks {
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .empty-state,
@@ -334,6 +372,7 @@ a {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .matrix {
@@ -444,6 +483,7 @@ a {
   display: flex;
   flex-direction: column;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .detail-empty {
@@ -588,6 +628,7 @@ a {
 .artifacts-panel {
   grid-column: 1 / -1;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .compare-content,
@@ -661,7 +702,8 @@ a {
 
 @media (max-width: 1100px) {
   body {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .app-shell {
