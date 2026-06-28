@@ -389,7 +389,7 @@ function renderArtifacts(records) {
     </div>
   `;
   if (artifacts.length === 0) {
-    root.innerHTML = `${sourceNote}<div class="empty-state">no public artifacts match the current filters</div>`;
+    root.innerHTML = `${sourceNote}<div class="empty-state">no public audit files match the current filters</div>`;
     return;
   }
   root.innerHTML = sourceNote + artifacts.map((artifact) => `

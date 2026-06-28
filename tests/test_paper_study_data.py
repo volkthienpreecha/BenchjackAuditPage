@@ -42,6 +42,45 @@ class PaperStudyDataTests(unittest.TestCase):
                 self.assertEqual(record["outcome_denominator"], denominator)
                 self.assertEqual(record["exploit_score"], score)
 
+    def test_table_one_fields_match_paper(self):
+        expected = {
+            "SWE-bench Verified": ("Software engineering", "Test suite", 500, ["V7"]),
+            "SWE-bench Pro": ("Software engineering", "Test suite + parser", 731, ["V1", "V7"]),
+            "FrontierSWE": ("Software engineering", "Test suite + verifier", 17, ["V1", "V7"]),
+            "MLE-Bench": ("ML engineering", "Script-based grading", 75, ["V2", "V6"]),
+            "SkillsBench": ("Coding skills", "Pytest framework", 88, ["V1"]),
+            "Terminal-Bench": ("Terminal operations", "Pytest framework", 89, ["V1"]),
+            "OSWorld": ("Desktop computing", "Script-based grading", 369, ["V7"]),
+            "WebArena": ("Web navigation", "DOM + LLM judge", 812, ["V2", "V5"]),
+            "NetArena": ("Network navigation", "Script-based grading", 5030, ["V3"]),
+            "AgentBench": ("General agent harness", "Multi-task", 903, ["V3"]),
+        }
+
+        for name, (domain, evaluation, tasks, flaws) in expected.items():
+            with self.subTest(name=name):
+                record = self.records[name]
+                self.assertEqual(record["domain"], domain)
+                self.assertEqual(record["evaluation_method"], evaluation)
+                self.assertEqual(record["task_count"], tasks)
+                self.assertEqual(record["major_flaws"], flaws)
+
+    def test_figure_five_major_flaw_counts_match_paper(self):
+        counts = {f"V{i}": 0 for i in range(1, 9)}
+        for record in self.payload["records"]:
+            for flaw in record["major_flaws"]:
+                counts[flaw] += 1
+
+        self.assertEqual(counts, {
+            "V1": 4,
+            "V2": 2,
+            "V3": 2,
+            "V4": 0,
+            "V5": 1,
+            "V6": 1,
+            "V7": 4,
+            "V8": 0,
+        })
+
     def test_terminal_bench_denominator_mismatch_is_explicit(self):
         terminal = self.records["Terminal-Bench"]
 
