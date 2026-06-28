@@ -153,13 +153,19 @@ a {
 }
 
 .summary-strip {
-  height: 52px;
+  min-height: 52px;
   display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 0 24px;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  row-gap: 6px;
+  padding: 9px 24px;
   border-bottom: 1px solid var(--border);
   color: var(--muted);
+}
+
+.summary-strip > div {
+  min-width: max-content;
   white-space: nowrap;
 }
 
@@ -174,13 +180,12 @@ a {
 }
 
 .summary-strip .updated {
-  margin-left: auto;
   color: var(--dim);
 }
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(280px, 420px) 170px 170px 230px 1fr;
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 170px) minmax(150px, 170px) minmax(210px, 230px) auto;
   gap: 16px;
   align-items: center;
   padding: 20px 24px 18px;
@@ -231,9 +236,10 @@ a {
 }
 
 .toolbar-actions {
-  margin-left: auto;
   display: flex;
   gap: 16px;
+  justify-content: flex-end;
+  min-width: 0;
 }
 
 .tool-btn {
