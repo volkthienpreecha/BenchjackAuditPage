@@ -19,6 +19,7 @@ class PaperStudyDataTests(unittest.TestCase):
         self.assertEqual(sum(record["task_count"] for record in self.payload["records"]), 8614)
         self.assertEqual(self.payload["summary"]["table_task_count"], 8614)
         self.assertEqual(self.payload["summary"]["flaw_count"], 219)
+        self.assertEqual(self.payload["summary"]["coverage_entry_count"], 230)
 
     def test_records_exact_appendix_outcomes(self):
         expected = {
@@ -49,10 +50,24 @@ class PaperStudyDataTests(unittest.TestCase):
         self.assertTrue(any("89 tasks" in note and "241 tasks" in note for note in terminal["data_notes"]))
         self.assertTrue(any("Terminal-Bench" in note and "241 tasks" in note for note in self.payload["notes"]))
 
+    def test_terminal_bench_patch_residual_is_explicit(self):
+        patch = self.records["Terminal-Bench"]["patch_study"]
+
+        self.assertEqual(patch["appendix_section"], "F.9")
+        self.assertEqual(patch["residual_class"], ["V1", "V8"])
+        self.assertEqual(patch["residual_exploited_count"], 228)
+        self.assertEqual(patch["residual_denominator"], 241)
+        self.assertIn("/bin/bash", patch["bypass_summary"])
+        self.assertIn("freshly built, separate container", patch["structural_fix"])
+
     def test_chart_only_values_are_not_promoted_to_data(self):
         self.assertEqual(
             self.payload["summary"]["chart_value_policy"],
             "exact values only; chart-only values are not digitized",
+        )
+        self.assertEqual(
+            self.payload["summary"]["coverage_entry_count_source"],
+            "Figure 6b per-flaw task coverage",
         )
         self.assertNotIn("figure6_severity_stacks", self.payload)
         self.assertNotIn("figure8_rounds", self.payload)

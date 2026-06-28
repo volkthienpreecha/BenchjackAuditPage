@@ -336,7 +336,9 @@ a {
 }
 
 .bench-name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--text);
   font-size: 15px;
   font-weight: 700;
@@ -370,8 +372,11 @@ a {
 
 .matrix-scroll {
   flex: 1;
+  width: 100%;
   min-height: 0;
+  max-width: 100%;
   overflow: auto;
+  contain: inline-size;
   scrollbar-gutter: stable;
 }
 
@@ -543,6 +548,39 @@ a {
   color: var(--dim);
 }
 
+.patch-study p {
+  margin-top: 14px;
+}
+
+.patch-grid {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.6fr) 1.4fr;
+  gap: 8px 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.patch-grid span {
+  color: var(--dim);
+}
+
+.patch-grid strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.patch-list {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.patch-list li::marker {
+  color: var(--purple);
+}
+
 .empty-inline {
   padding: 8px 0 14px;
   color: var(--dim);
@@ -596,6 +634,48 @@ a {
   display: grid;
   gap: 2px;
   margin-bottom: 14px;
+}
+
+.archive-mark {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in oklch, var(--purple), transparent 45%);
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.source-note {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.source-note strong {
+  color: var(--green);
+}
+
+.source-note span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.source-note em {
+  color: var(--dim);
+  font-style: normal;
 }
 
 .artifact-row,
@@ -765,7 +845,7 @@ a {
 
   .bench-list-head,
   .bench-row {
-    grid-template-columns: 1fr 54px 58px;
+    grid-template-columns: minmax(0, 1fr) 54px 58px;
   }
 
   .bench-list-head span:last-child,

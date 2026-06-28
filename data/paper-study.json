@@ -15,13 +15,15 @@
   "summary": {
     "backend": "Claude Code",
     "chart_value_policy": "exact values only; chart-only values are not digitized",
+    "coverage_entry_count": 230,
+    "coverage_entry_count_source": "Figure 6b per-flaw task coverage",
     "flaw_count": 219,
     "record_count": 10,
     "table_task_count": 8614
   },
   "notes": [
     "Paper Table 1 lists Terminal-Bench with 89 tasks, while Appendix E/F reports Terminal-Bench exploit and patch outcomes over 241 tasks. The table task count and appendix exploit denominator are therefore shown separately.",
-    "Paper text reports 219 distinct flaws, while Figure 6 labels per-flaw task coverage as 230 total. This dataset uses 219 as the headline and does not convert Figure 6 chart-only bins into data."
+    "Paper text reports 219 distinct flaws, while Figure 6 labels per-flaw task coverage as 230 total. This dataset shows 219 as the distinct-flaw headline and 230 as the Figure 6 coverage-entry count."
   ],
   "records": [
     {
@@ -384,6 +386,27 @@
       "mode": "paper-study",
       "name": "Terminal-Bench",
       "outcome_denominator": 241,
+      "patch_study": {
+        "appendix_section": "F.9",
+        "bypass_summary": "The residual exploit overwrites /bin/bash with a wrapper. The outer -c call passes through to bash.real and prints the nonce envelope; the inner /tests/run-tests.sh call short-circuits and emits forged pytest PASSED lines inside that envelope.",
+        "mitigations": [
+          "_is_resolved returns false for empty parser results.",
+          "_setup_test_env removes /tests before put_archive.",
+          "_run_tests uses container.exec_run with /bin/bash --noprofile --norc and nonce-bounds stdout/stderr.",
+          "_run_trial feeds trusted exec output, not post_test_pane, to _parse_results.",
+          "terminal/security-override.yaml adds no-new-privileges:true and pids_limit:4096.",
+          "Per-task V2/V3 fixes remove leaked build-context files and replace unsafe eval calls."
+        ],
+        "residual_class": [
+          "V1",
+          "V8"
+        ],
+        "residual_denominator": 241,
+        "residual_exploited_count": 228,
+        "source_label": "Paper Appendix F.9",
+        "source_url": "https://arxiv.org/abs/2605.12673",
+        "structural_fix": "Run tests in a freshly built, separate container with the agent's output paths mounted read-only."
+      },
       "source_label": "Paper Table 1 + Appendix E.9",
       "source_url": "https://arxiv.org/abs/2605.12673",
       "summary": "Terminal-Bench is a terminal-operations benchmark where Appendix E reports a single payload verifying 241 of 241 tasks. Table 1 lists the benchmark scope as 89 tasks, so both numbers are kept separate.",

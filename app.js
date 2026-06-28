@@ -107,6 +107,8 @@ function buildDisplayData(paper, audit) {
     archive_records: archiveRecords,
     notes: paper?.notes || [],
     summary: {
+      archive_record_count: archiveRecords.length,
+      coverage_entry_count: paper?.summary?.coverage_entry_count ?? null,
       flaw_count: paper?.summary?.flaw_count ?? null,
       table_task_count: paper?.summary?.table_task_count ?? null,
       record_count: records.length,
@@ -166,6 +168,11 @@ function filteredRecords() {
       record.backend,
       record.mode,
       record.source_label,
+      record.archive_source_path,
+      record.patch_study?.appendix_section,
+      record.patch_study?.bypass_summary,
+      record.patch_study?.structural_fix,
+      ...(record.patch_study?.residual_class || []),
       ...(record.major_flaws || []),
     ].join(" ").toLowerCase();
     if (state.filters.search && !haystack.includes(state.filters.search)) return false;
@@ -205,6 +212,8 @@ function renderSummary(records) {
   document.querySelector("#summary-source").textContent = state.data.source_label;
   document.querySelector("#summary-updated").textContent = state.data.generated_at;
   document.querySelector("#summary-flaws").textContent = state.data.summary.flaw_count?.toLocaleString() || "n/a";
+  document.querySelector("#summary-coverage").textContent = state.data.summary.coverage_entry_count?.toLocaleString() || "n/a";
+  document.querySelector("#summary-archives").textContent = state.data.summary.archive_record_count?.toLocaleString() || "0";
   document.querySelector("#footer-data-date").textContent = state.data.generated_at;
   document.querySelector("#bench-count").textContent = records.length;
 }
@@ -222,7 +231,7 @@ function renderBenchmarks(records) {
     button.className = `bench-row ${record.id === state.selectedId ? "active" : ""}`;
     button.innerHTML = `
       <span>
-        <span class="bench-name">${index + 1} ${escapeHtml(record.name)}</span>
+        <span class="bench-name">${index + 1} ${escapeHtml(record.name)} ${archiveBadge(record)}</span>
         <span class="bench-desc">${escapeHtml(record.domain || hostLabel(record.upstream_repo) || record.source_label || "result record")}</span>
       </span>
       <span>${record.task_count ?? "n/a"}</span>
@@ -285,14 +294,18 @@ function renderDetail(record) {
       ${record.evaluation_method ? metaRow("evaluation", record.evaluation_method) : ""}
       ${metaRow(record.record_source === "paper-study" ? "table tasks" : "tasks", record.task_count ?? "n/a")}
       ${metaRow("exploit outcome", outcomeLabel(record))}
+      ${record.patch_study ? metaRow("patch residual", patchOutcomeLabel(record.patch_study)) : ""}
       ${metaRow("major flaws", majorFlawLabel(record))}
+      ${record.patch_study ? metaRow("residual class", record.patch_study.residual_class?.join(", ") || "n/a") : ""}
       ${record.upstream_repo ? metaRow("upstream repo", linkHtml(record.upstream_repo, hostLabel(record.upstream_repo)), true) : ""}
       ${record.upstream_commit ? metaRow("upstream commit", linkHtml(record.upstream_commit_url, record.upstream_commit), true) : ""}
       ${metaRow("date", record.audited_on || "n/a")}
       ${metaRow("backend", record.backend || "n/a")}
       ${metaRow("mode", record.mode || "n/a")}
+      ${metaRow("archive status", archiveStatusLabel(record), true)}
       ${record.archive_source_url ? metaRow("audit archive", linkHtml(record.archive_source_url, record.archive_source_path || "FrontierSWE archive"), true) : ""}
     </div>
+    ${record.patch_study ? patchStudySection(record.patch_study) : ""}
     <div class="detail-section">
       <h3>artifacts</h3>
       <div class="artifact-list">
@@ -337,6 +350,7 @@ function renderCompare(records) {
           <th>domain</th>
           <th>tasks</th>
           <th>exploit</th>
+          <th>patch residual</th>
           <th>major flaws</th>
           ${Object.keys(VULN_LABELS).map((vuln) => `<th>${vuln}</th>`).join("")}
         </tr>
@@ -348,6 +362,7 @@ function renderCompare(records) {
             <td>${escapeHtml(record.domain || "n/a")}</td>
             <td>${record.task_count ?? "n/a"}</td>
             <td>${escapeHtml(outcomeLabel(record))}</td>
+            <td>${escapeHtml(record.patch_study ? patchOutcomeLabel(record.patch_study) : "n/a")}</td>
             <td>${escapeHtml(majorFlawLabel(record))}</td>
             ${Object.keys(VULN_LABELS).map((vuln) => {
               const finding = record.findings[vuln] || { severity: "na" };
@@ -363,11 +378,21 @@ function renderCompare(records) {
 function renderArtifacts(records) {
   const root = document.querySelector("#artifacts-content");
   const artifacts = records.flatMap((record) => (record.artifacts || []).map((artifact) => ({ ...artifact, benchmark: record.name })));
+  const source = state.data.audit?.source || {};
+  const archiveCount = state.data.summary.archive_record_count || 0;
+  const sourceNote = `
+    <div class="source-note">
+      <span><strong>${archiveCount.toLocaleString()}</strong> public audit archive record${archiveCount === 1 ? "" : "s"}</span>
+      <span>from <em>${escapeHtml(source.path || "audits")}/</em></span>
+      ${source.repo_url ? `<span>at ${linkHtml(source.repo_url, hostLabel(source.repo_url))}</span>` : ""}
+      ${source.commit ? `<span><em>${escapeHtml(source.commit.slice(0, 8))}</em></span>` : ""}
+    </div>
+  `;
   if (artifacts.length === 0) {
-    root.innerHTML = `<div class="empty-state">no public artifacts match the current filters</div>`;
+    root.innerHTML = `${sourceNote}<div class="empty-state">no public artifacts match the current filters</div>`;
     return;
   }
-  root.innerHTML = artifacts.map((artifact) => `
+  root.innerHTML = sourceNote + artifacts.map((artifact) => `
     <a class="artifact-wide" href="${escapeHtml(artifact.url)}" target="_blank" rel="noreferrer">
       <span>
         <strong>${escapeHtml(artifact.benchmark)}</strong>
@@ -453,6 +478,44 @@ function artifactRow(artifact) {
       <span>${formatBytes(artifact.size_bytes)}</span>
     </a>
   `;
+}
+
+function archiveBadge(record) {
+  if (!record.archive_source_url) return "";
+  return `<span class="archive-mark" title="public audit archive backed">archive</span>`;
+}
+
+function archiveStatusLabel(record) {
+  if (!record.archive_source_url) return `<span class="dim">paper-only row</span>`;
+  const count = record.artifacts?.length || 0;
+  return `<span class="archive-mark">archive</span> ${count.toLocaleString()} artifact${count === 1 ? "" : "s"}`;
+}
+
+function patchStudySection(study) {
+  return `
+    <div class="detail-section patch-study">
+      <h3>patch study</h3>
+      <div class="patch-grid">
+        <span>source</span>
+        <strong>${linkHtml(study.source_url, study.source_label || study.appendix_section || "paper appendix")}</strong>
+        <span>residual</span>
+        <strong>${escapeHtml(patchOutcomeLabel(study))}</strong>
+        <span>class</span>
+        <strong>${escapeHtml(study.residual_class?.join(", ") || "n/a")}</strong>
+      </div>
+      <p>${escapeHtml(study.bypass_summary || "")}</p>
+      ${study.mitigations?.length ? `<ul class="patch-list">${study.mitigations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
+      ${study.structural_fix ? `<p class="dim">structural fix: ${escapeHtml(study.structural_fix)}</p>` : ""}
+    </div>
+  `;
+}
+
+function patchOutcomeLabel(study) {
+  if (study?.residual_exploited_count !== undefined && study?.residual_denominator !== undefined) {
+    const score = (Number(study.residual_exploited_count) / Number(study.residual_denominator)) * 100;
+    return `${Number(study.residual_exploited_count).toLocaleString()} / ${Number(study.residual_denominator).toLocaleString()} residual (${formatPercent(score)})`;
+  }
+  return "n/a";
 }
 
 function linkHtml(url, label) {
